@@ -2,6 +2,7 @@
 
 #include <atomic>
 #include <functional>
+#include <any>
 #include <memory>
 #include <mutex>
 #include <vector>
@@ -44,8 +45,19 @@ public:
     // 判断EventLoop对象是否在自己的线程里面
     bool isInLoopThread() const { return threadId_ == CurrentThread::tid(); }
 
+    void setContext(const std::any& context)
+    { context_ = context; }
+
+    const std::any& getContext() const
+    { return context_; }
+
+    std::any* getMutableContext()
+    { return &context_; }
+
+
+
 private:
-    void handleRead();         // wake up  通过给wakeupfd上写入数据，唤醒ioLoop
+    void handleRead();  // wake up  通过给wakeupfd上写入数据，唤醒ioLoop
     void doPendingFunctors();  // 执行回调
 
     using ChannelList = std::vector<Channel*>;
@@ -69,4 +81,6 @@ private:
         callingPendingFunctors_;  // 标识当前loop是否有需要执行的回调操作
     std::vector<Functor> pendingFunctors_;  // 存储loop需要执行的所有的回调操作
     std::mutex mutex_;  // 互斥锁，用来保护上面vector容器的线程安全操作
+
+    std::any context_;
 };

@@ -79,6 +79,9 @@ public:
         }
     }
 
+    // 复制整串字符串
+    void append(const std::string& str) { append(str.c_str(), str.size()); }
+
     // 把[data, data+len]内存上的数据，添加到writable缓冲区当中
     void append(const char* data, size_t len) {
         ensureWriteableBytes(len);
@@ -86,6 +89,26 @@ public:
         std::copy(data, data + len, beginWrite());
         writerIndex_ += len;
     }
+
+    const char* findCRLF() const {
+        // 使用 std::search() 函数在缓冲区的当前读位置（peek()
+        // 返回的值）和写位置（beginWrite() 返回的值）之间查找回车换行符（由
+        // kCRLF 和 kCRLF + 2 表示）
+        const char* crlf = std::search(peek(), beginWrite(), kCRLF, kCRLF + 2);
+        // 如果找到了回车换行符，则返回它在缓冲区中的指针；否则，返回 NULL
+        return crlf == beginWrite() ? NULL : crlf;
+    }
+
+    const char* findCRLF(const char* start) const {
+        const char* crlf = std::search(start, beginWrite(), kCRLF, kCRLF + 2);
+        return crlf == beginWrite() ? NULL : crlf;
+    }
+
+    // 用于从缓冲区中取出数据直到指定位置
+    // 接受一个 const char* 类型的参数
+    // end，表示要取出数据的结束位置。通过计算要取出的数据长度（end-peek()），
+    // 调用 retrieve() 函数将该长度的数据从缓冲区中取出。
+    void retrieveUntil(const char* end) { retrieve(end - peek()); }
 
     char* beginWrite() { return begin() + writerIndex_; }
 
@@ -127,4 +150,6 @@ private:
     std::vector<char> buffer_;
     size_t readerIndex_;
     size_t writerIndex_;
+
+    static const char kCRLF[];
 };
