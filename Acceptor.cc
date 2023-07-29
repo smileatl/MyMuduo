@@ -48,6 +48,7 @@ void Acceptor::listen() {
 }
 
 // listenfd有事件发生了，就是有新用户连接了
+// 接受新连接，并且以负载均衡的选择方式选择一个sub EventLoop，并把这个新连接分发到这个subEventLoop上。
 void Acceptor::handleRead() {
     InetAddress peerAddr;
     int connfd = acceptSocket_.accept(&peerAddr);

@@ -34,7 +34,7 @@ TcpServer::TcpServer(EventLoop* loop,
 
 TcpServer::~TcpServer() {
     for (auto& item : connections_) {
-        // 这个局部的shared_ptr智能指针对象，出右括号，可以自动释放new出来的TcpConnection对象资源了
+        // 这个局部的shared_ptr智能指针对象，出右中括号（当前代码块），可以自动释放new出来的TcpConnection对象资源了
         TcpConnectionPtr conn(item.second);
         item.second.reset();
 
@@ -54,6 +54,7 @@ void TcpServer::start() {
     if (started_++ == 0)  // 防止一个TcpServer对象被start多次
     {
         // 把subpool都启动起来
+        // threadInitCallback_线程初始化的回调
         threadPool_->start(threadInitCallback_);  // 启动底层的loop线程池
         loop_->runInLoop(std::bind(&Acceptor::listen, acceptor_.get()));
     }

@@ -29,10 +29,10 @@ private:
     void handleRead();
 
     EventLoop *loop_; // Acceptor用的就是用户定义的那个baseLoop，也称作mainLoop
-    Socket acceptSocket_;
-    Channel acceptChannel_;
+    Socket acceptSocket_; //它负责监听的就是acceptSocket_上的事件
+    Channel acceptChannel_; //将acceptSocket_封装成acceptChannel_
 
-    NewConnectionCallback newConnectionCallback_;
+    NewConnectionCallback newConnectionCallback_;   //当loop_里的poller发现acceptSocket_上有事件发生时，向loop_返回acceptChannel_，Acceptor执行此回调
     bool listenning_;
 
 };

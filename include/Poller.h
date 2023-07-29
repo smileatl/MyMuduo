@@ -24,7 +24,8 @@ public:
     virtual ~Poller()=default;
 
     // 纯虚函数，抽象类不能实例
-    // 给所有IO复用保留统一的接口
+    // 给所有IO复用保留统一的接口,需要它们去重写的;
+    //当前激活的channel，运行的channel，需要Poller去照顾的channel都在ChannelList里边;
     virtual Timestamp poll(int timeouts, ChannelList *activeChannels)=0;
     virtual void updateChannel(Channel *channel)=0;
     virtual void removeChannel(Channel *channel)=0;
@@ -38,6 +39,7 @@ public:
 protected:
     // map的key：sockfd  value：sockfd所属的channel通道类型
     using ChannelMap=std::unordered_map<int, Channel*>;
+    //poller监听的channel是EventLoop（EventLoop里边有ChannelList）里边保存的channel
     ChannelMap channels_;
     
 private:

@@ -37,10 +37,10 @@ private:
     std::string name_;
     bool started_;
     int numThreads_;
-    int next_;
+    int next_; //做下一个loop的下表用的；
     // 包含所有创建的事件的线程
     std::vector<std::unique_ptr<EventLoopThread>> threads_;
-    // 包含事件线程里，EventLoop的指针
+    // 包含事件线程里，所有EventLoop的指针
     // 通过调用EventLoopThread中startLoop()可以产生
     std::vector<EventLoop*> loops_;
 

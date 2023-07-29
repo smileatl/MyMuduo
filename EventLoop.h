@@ -45,7 +45,7 @@ public:
     bool isInLoopThread() const { return threadId_ == CurrentThread::tid(); }
 
 private:
-    void handleRead();         // wake up
+    void handleRead();         // wake up  通过给wakeupfd上写入数据，唤醒ioLoop
     void doPendingFunctors();  // 执行回调
 
     using ChannelList = std::vector<Channel*>;

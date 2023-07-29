@@ -20,7 +20,7 @@ EventLoopThread::~EventLoopThread() {
 }
 
 EventLoop* EventLoopThread::startLoop() {
-    thread_.start();  // 启动底层的新线程
+    thread_.start();  //loop开启时，底层的线程开启了，回调函数threadFunc()就开启了
 
     EventLoop* loop = nullptr;
     {
@@ -36,8 +36,7 @@ EventLoop* EventLoopThread::startLoop() {
 // 下面这个方法，实在单独的新线程里面运行的
 // 这才是真真正正执行的线程
 void EventLoopThread::threadFunc() {
-    EventLoop loop;  // 创建了一个独立的eventloop，和上面的线程是一一对应的，one
-                     // loop per thread
+    EventLoop loop;  // 创建了一个独立的eventloop，和上面的线程是一一对应的，one loop per thread
 
     if (callback_) {
         callback_(&loop);

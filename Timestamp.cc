@@ -2,6 +2,7 @@
 #include <time.h>
 
 Timestamp::Timestamp():microSecondsSinceEpoch_(0){}
+// 构造函数初始化列表的语法
 Timestamp::Timestamp(int64_t microSecondsSinceEpoch):microSecondsSinceEpoch_(microSecondsSinceEpoch){}
 Timestamp Timestamp::now(){
     time_t ti=time(NULL);
@@ -19,6 +20,7 @@ std::string Timestamp::toString() const{
         tm_time->tm_hour,
         tm_time->tm_min,
         tm_time->tm_sec);
+    // C形式的字符串
     return buf;
 }
 

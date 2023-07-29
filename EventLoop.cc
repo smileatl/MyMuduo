@@ -18,6 +18,7 @@ const int kPollTimeMs = 10000;
 
 // 创建wakeupfd，用来notify唤醒subReactor处理新来的channel
 int createEventfd() {
+    //eventfd创建失败，一般不会失败，除非一个进程把文件描述符（Linux一个进程1024个最多）全用光了。
     int evtfd = ::eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
     if (evtfd < 0) {
         LOG_FATAL("eventfd error:%d \n", errno);
@@ -25,6 +26,7 @@ int createEventfd() {
     return evtfd;
 }
 
+// wakeupFd_(createEventfd())生成一个生成一个eventfd，每个EventLoop对象，都会有自己的eventfd
 EventLoop::EventLoop()
     : looping_(false),
       quit_(false),
@@ -34,6 +36,7 @@ EventLoop::EventLoop()
       wakeupFd_(createEventfd()),
       wakeupChannel_(new Channel(this, wakeupFd_)) {
     LOG_DEBUG("EventLoop created %p in thread %d \n", this, threadId_);
+    //如果当前线程已经绑定了某个EventLoop对象了，那么该线程就无法创建新的EventLoop对象了
     if (t_loopInThisThread) {
         LOG_FATAL("Another EventLoop %p exists in this thread %d \n",
                   t_loopInThisThread, threadId_);
@@ -64,6 +67,7 @@ void EventLoop::loop() {
     while (!quit_) {
         activeChannels_.clear();
         // 监听两类fd，一种是client的fd，一种wakeupfd
+        //此时activeChannels_已经填好了事件发生的channel
         pollReturnTime_ = poller_->poll(kPollTimeMs, &activeChannels_);
         for (Channel* channel : activeChannels_) {
             // Poller监听哪些channel发生事件了，然后上报给EventLoop，通知channel处理相应的事件
@@ -73,15 +77,15 @@ void EventLoop::loop() {
         /**
          * mainloop只做accept
          * IO线程 mainLoop accept fd《=channel subloop
-         * mainLoop 事先注册一个回调cb（需要subloop来执行）    wakeup
-         * subloop后，执行下面的方法，执行之前mainloop注册的cb操作
+         * mainLoop 事先注册一个回调cb（需要subloop来执行）    
+         * wakeup subloop后，执行下面的方法，执行之前mainloop注册的cb操作
          */
         doPendingFunctors();
     }
     LOG_INFO("EventLoop %p stop looping. \n", this);
     looping_ = false;
 }
-// 退出事件循环  1.loop在自己的线程中调用quit  2.在非loop的线程中，调用loop的quit
+// 退出事件循环  1.loop在自己的线程中调用quit  2.在非loop的线程中，调用loop的quit    
 /**
  *              mainLoop
  *
@@ -103,6 +107,7 @@ void EventLoop::quit() {
 }
 
 // 在当前loop中执行cb
+// 该函数保证了cb这个函数对象一定是在其EventLoop线程中被调用。
 void EventLoop::runInLoop(Functor cb) {
     if (isInLoopThread()) {  // 在当前的loop线程中，执行cb
         cb();

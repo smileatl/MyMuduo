@@ -47,6 +47,9 @@ public:
 
     // 开启服务器监听
     void start();
+
+    EventLoop* getLoop() const {return loop_;}
+
 private:
     void newConnection(int sockfd, const InetAddress &peerAddr);
     void removeConnection(const TcpConnectionPtr &conn);

@@ -34,6 +34,7 @@ ssize_t Buffer::readFd(int fd, int* saveErrno) {
     {
         writerIndex_ += n;
     } else {
+        // Buffer空间不够存，需要把溢出的部分（extrabuf）倒到Buffer中（会先触发扩容机制）
         // extrabuf里面也写入了数据
         writerIndex_ = buffer_.size();
         // Buffer已经存了writable个数据

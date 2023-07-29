@@ -34,7 +34,7 @@ Timestamp EPollPoller::poll(int timeoutMs, ChannelList* activeChannels) {
     LOG_INFO("func=%s => fd total count:%lu \n", __FUNCTION__,
              channels_.size());
 
-    // &*events_.begin()数组的其实地址
+    // &*events_.begin()数组的起始地址
     int numEvents = ::epoll_wait(epollfd_, &*events_.begin(),
                                  static_cast<int>(events_.size()), timeoutMs);
     int saveErrno = errno;
